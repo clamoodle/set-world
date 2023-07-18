@@ -140,5 +140,14 @@
     "friends": [],
     "high_score": 3709,
     "email": "inthemistofoodles@gmail.com"
+  },
+  {
+    "username": "testkowski",
+    "password": "123",
+    "image_path": "media/avatars/green-wide.png",
+    "species": "eel",
+    "friends": [],
+    "high_score": 233,
+    "email": "inthemistofoodles@gmail.com"
   }
 ]

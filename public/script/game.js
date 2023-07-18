@@ -5,7 +5,7 @@
 
 (function () {
     "use strict";
-    const POST_SCORE_BASE_URL = "/updateScore";
+    const POST_SCORE_BASE_URL = "/users/updateScore";
 
     // Game mechanics constants
     const JUMP_COOLDOWN_MS = 700; // Time in MS, double the time in game-styles.css to jump up

@@ -42,7 +42,7 @@
     // Login fetch cookies!
     let params = new FormData(qs("#login-window form"));
     try {
-      let resp = await fetch(`/login`, { method: "GET", headers: params });
+      let resp = await fetch(`/users/login`, { method: "GET", headers: params });
       resp = await checkStatus(resp);
       let userInfo = await resp.json();
 

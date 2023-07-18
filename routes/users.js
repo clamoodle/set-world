@@ -5,11 +5,11 @@ const cookieParser = require("cookie-parser");
 
 // const logger = require("morgan");
 
+const USER_DATA_PATH = "users.json";
 const COOKIE_SECRET = "20CWmcWQQN";
 
-const app = express();
-app.use(express.static("public"));
-app.use(cookieParser(COOKIE_SECRET));
+router.use(express.static("public"));
+router.use(cookieParser(COOKIE_SECRET));
 
 /*-------------------- app.get/app.post endpoints -------------------- */
 
@@ -21,7 +21,7 @@ app.use(cookieParser(COOKIE_SECRET));
  * If param "sort" is by "scores", the list of users will be returned in order of highest high score
  * to lowest high score.
  */
-app.get("/users", readUserData, getFilteredUserData, (req, res) => {
+router.get("/users", readUserData, getFilteredUserData, (req, res) => {
     if (req.query.sort === "scores") {
         sortByKeyValue(res.locals.users, "high_score");
     }
@@ -32,7 +32,7 @@ app.get("/users", readUserData, getFilteredUserData, (req, res) => {
  * REF: http://eipsum.github.io/cs132/lectures/lec19-cs-wrapup-and-cookies/code/cookie-demo.zip
  * Logs in user and updates cookies for a new visit by logging user into "curr_user".
  */
-app.get("/login", readUserData, async (req, res) => {
+router.get("/login", readUserData, async (req, res) => {
     try {
         const username = req.headers.username;
         const password = req.headers.password;
@@ -56,7 +56,7 @@ app.get("/login", readUserData, async (req, res) => {
  * Required POST parameters: username, password, image_path, and species
  * Friends is set to [] and high_score is set to null.
  */
-app.post("/newUser", readUserData, checkUserParams, (req, res, next) => {
+router.post("/newUser", readUserData, checkUserParams, (req, res, next) => {
     // Update data JSON
     res.locals.users.push(res.locals.user);
     updateUsers(USER_DATA_PATH, res.locals.users);
@@ -68,7 +68,7 @@ app.post("/newUser", readUserData, checkUserParams, (req, res, next) => {
  * Required POST path parameter: specified user
  * Returns new friends list
  */
-app.post("/addFriend/:username", readUserData, (req, res, next) => {
+router.post("/addFriend/:username", readUserData, (req, res, next) => {
     if (!req.params.username) {
         next(Error("Required POST path parameter for /addFriend: username."));
     }
@@ -99,7 +99,7 @@ app.post("/addFriend/:username", readUserData, (req, res, next) => {
  * or if user has no score records, this score will be saved as the user's high score.
  * Required POST parameter: score
  */
-app.post("/updateScore", readUserData, async (req, res, next) => {
+router.post("/updateScore", readUserData, async (req, res, next) => {
     if (!req.body || !req.body.score) {
         next(Error("Required POST parameters for /updateScore: score."));
     }
@@ -250,7 +250,7 @@ function handleError(err, req, res, next) {
     res.send(err.message);
 }
 
-app.use(handleError);
+router.use(handleError);
 
 /*------------------------- Helper Functions ------------------------- */
 

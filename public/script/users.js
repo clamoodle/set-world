@@ -8,8 +8,8 @@
 
 (function () {
   "use strict";
-  const GET_USER_BASE_URL = "/users?";
-  const ADD_FRIEND_BASE_URL = "/addFriend/";
+  const GET_USER_BASE_URL = "/users/users?";
+  const ADD_FRIEND_BASE_URL = "/users/addFriend/";
   const LEADERBOARD_LENGTH = 10; // Good to-do is to update HTML leaderboard heading to always match
 
   let userOptionsPopulated = false;
