@@ -61,7 +61,7 @@
         // Initial score and timer
         qs("#score-count").textContent = 0;
         secondsRemaining = TOTAL_GAME_TIME_MS / 1000;
-        displayTime();
+        displayTime()
 
         // Show start message
         qs("#game-start-msg").classList.remove("hidden");
