@@ -12,6 +12,7 @@
  */
 
 const express = require("express");
+const http = require("http");
 const fsp = require("fs/promises");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
@@ -20,12 +21,10 @@ const path = require("path");
 
 // const logger = require("morgan");
 
-// const indexRouter = require("./routes/index");
-// const usersRouter = require("./routes/users");
-
 const COOKIE_SECRET = "20CWmcWQQN";
 
 const app = express();
+const server = http.createServer(app);
 // const io = socket(server);
 app.use(express.static("public"));
 app.use(cookieParser(COOKIE_SECRET));
@@ -53,8 +52,6 @@ app.use("/users", usersRouter);
 // app.use(logger("dev"));
 // app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, "public")));
 
 // io.on("connection", (socket) => {
 //     console.log("Made socket connection", socket.id);

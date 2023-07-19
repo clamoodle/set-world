@@ -1,10 +1,17 @@
 started logging since 5/7/2023 too much to keep track of!!
 
+# 7/19/2023:
+
+## implemented:
+
+    - fixed bug obstacle count not resetting
+
 # 7/18/2023:
 
 ## implemented:
 
 -   In-game count-down
+-   factored out all users end points completely
 
 # 7/16/2023:
 
@@ -14,9 +21,11 @@ started logging since 5/7/2023 too much to keep track of!!
 
 ## todo:
 
+-   (BUG!!!) obstacle count not resetting
 -   In-game count-down
+-   factor out end points completely
 -   pause button
--   (BUG) clear cookies upon reload
+-   (BUG) clear cookies upon reload / log out button
 -   multiplayer
 -   factor out end points completely
 -   (BUG) Currently leaderboard doesn't include current user (add query param in get users endpoint for

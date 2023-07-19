@@ -5,6 +5,8 @@
 
 (function () {
     "use strict";
+    // const socket = io.connect("http://localhost:3000");
+
     const POST_SCORE_BASE_URL = "/users/updateScore";
 
     // Game mechanics constants
@@ -61,7 +63,11 @@
         // Initial score and timer
         qs("#score-count").textContent = 0;
         secondsRemaining = TOTAL_GAME_TIME_MS / 1000;
-        displayTime()
+        displayTime();
+
+        // Inital obstacl count
+        qs("#obstacle-count").textContent =
+            qs("#obstacle-rate-input").value * NUM_OBSTACLE_PER_RATE;
 
         // Show start message
         qs("#game-start-msg").classList.remove("hidden");
@@ -412,7 +418,7 @@
      * @param {Number} gameTimePassedMS - the total time in MS that has passed since starting game
      */
     function generateMap(gameTimePassedMS) {
-        let numObstacles = qs("#obstacle-rate-input").value * NUM_OBSTACLE_PER_RATE;
+        const numObstacles = qs("#obstacle-count").textContent;
 
         // Minimum and maximum time in MS between each obstacle
         let obstacleMinTimeGapMS = (TOTAL_GAME_TIME_MS / numObstacles) * 0.5;
