@@ -12,10 +12,15 @@
     // Game mechanics constants
     const JUMP_COOLDOWN_MS = 700; // Time in MS, double the time in game-styles.css to jump up
     const TOTAL_GAME_TIME_MS = 120000;
-    const NUM_OBSTACLE_PER_RATE = 5; // Pretty much arbitrary, but default is 30 obstacles in 2 min.
     const BUFFER_TIME_BEFORE_GAME_ENDS_MS = 2000; // The time between the last obstacle and the goal
     const COLLISION_LENIENCY_PX = 20;
     const SCORE_IF_REACH_GOAL = 500;
+
+    // Obstacle constants
+    const NUM_OBSTACLE_PER_RATE = 5; // Pretty much arbitrary, but default is 30 obstacles in 2 min.
+    // Minimum and maximum time in MS between each obstacle
+    let OBSTACLE_MIN_GAP_MS = (TOTAL_GAME_TIME_MS / qs("#obstacle-count").textContent) * 0.5;
+    let OBSTACLE_MAX_GAP_MS = (TOTAL_GAME_TIME_MS / qs("#obstacle-count").textContent) * 1.5;
 
     /**
      * Calculates the time interval between each score increment by 1, default for rate=6 gives 100.
@@ -48,6 +53,11 @@
     let timerId = null;
     let obstacleGenTimeOutId = null;
     let secondsRemaining;
+
+    // The time interval between each obstacle, the game will start with an obstacle immediately,
+    // then after arr[0] milliseconds the next will appear. The 'obstacle' after arr[-1] finally
+    // should be the goal
+    let obstacleInterarrivalMS = [];
 
     function init() {
         qs("#create-button").addEventListener("click", showCreateChar);
@@ -93,6 +103,12 @@
         pauseAllSlidingAnimation(false, false);
         // Reset the goal in case we came from a previous game
         qs(".goal").classList.remove("sliding-layer");
+
+        // Generate obstacle interarrival times with lambda averaging to total time / n obstacles
+        generateObstacleInterarrivalTimes(
+            TOTAL_GAME_TIME_MS,
+            NUM_OBSTACLE_PER_RATE * qs("#obstacle-rate-input").value
+        );
         generateMap(0);
         collisionTimerId = setInterval(handleCollision, 1000 / FRAME_RATE_FPS);
 
@@ -413,35 +429,47 @@
     }
 
     /**
+     * Populates obstacleInterarrivalMS in place uniformly with average totalTime / numArrivals
+     * while normalizing total sum time to be exactly totalTime
+     * @param {Number} totalTime - The total amount of time the interarrival times expect to sum to
+     * @param {Number} numArrivals - The number of arrivals to fit within this total time
+     */
+    function generateObstacleInterarrivalTimes(totalTime, numArrivals) {
+        // Generate interarrival times with exponential distribution with given average
+        obstacleInterarrivalMS = [];
+        for (let i = 0; i < numArrivals; i++) {
+            const randomIntervalMS =
+                Math.random() * (OBSTACLE_MAX_GAP_MS - OBSTACLE_MIN_GAP_MS) + OBSTACLE_MIN_GAP_MS;
+            obstacleInterarrivalMS.push(randomIntervalMS);
+        }
+
+        // Normalize so that array sums to totalTime
+        const currentSum = obstacleInterarrivalMS.reduce((sum, time) => sum + time, 0);
+        const adjustmentFactor = totalTime / currentSum;
+
+        obstacleInterarrivalMS = obstacleInterarrivalMS.map((time) => time * adjustmentFactor);
+    }
+
+    /**
      * Generate obstacles with random time intervals between them and the goal at the end
      * Recursive to generate obstacles one after another
-     * @param {Number} gameTimePassedMS - the total time in MS that has passed since starting game
+     * @param {Number} idx - the index of 'obstacleInterarrivalMS' we're currently on
      */
-    function generateMap(gameTimePassedMS) {
-        const numObstacles = qs("#obstacle-count").textContent;
-
-        // Minimum and maximum time in MS between each obstacle
-        let obstacleMinTimeGapMS = (TOTAL_GAME_TIME_MS / numObstacles) * 0.5;
-        let obstacleMaxTimeGapMS = (TOTAL_GAME_TIME_MS / numObstacles) * 1.5;
-
-        // Genearate random time gap
-        let obstacleTimeGapMS =
-            Math.floor(Math.random() * (obstacleMaxTimeGapMS - obstacleMinTimeGapMS)) +
-            obstacleMinTimeGapMS;
+    function generateMap(idx) {
+        // Genearated random time gap
+        const obstacleTimeGapMS = obstacleInterarrivalMS[idx];
 
         // Recursion to generate obstacles with time gap
-        if (qs("#obstacle-count").textContent > 0) {
+        if (qs("#obstacle-count").textContent > 0 && !gameOver) {
             generateObstacle();
             obstacleGenTimeOutId = setTimeout(() => {
-                generateMap(gameTimePassedMS + obstacleTimeGapMS);
+                generateMap(idx + 1);
             }, obstacleTimeGapMS);
         } else if (!gameOver) {
             // Start sliding the final goal/finish line after the obstacles
-            const gameTimeRemainingMS = TOTAL_GAME_TIME_MS - gameTimePassedMS; // Approximate
-            const timeUntilGoalMS = Math.max(BUFFER_TIME_BEFORE_GAME_ENDS_MS, gameTimeRemainingMS);
             setTimeout(() => {
                 qs(".goal").classList.add("sliding-layer");
-            }, timeUntilGoalMS);
+            }, obstacleTimeGapMS);
         }
     }
 

@@ -22,6 +22,7 @@ const path = require("path");
 // const logger = require("morgan");
 
 const COOKIE_SECRET = "20CWmcWQQN";
+let SESSIONS = {};
 
 const app = express();
 const server = http.createServer(app);
@@ -36,7 +37,6 @@ app.use(cookieParser(COOKIE_SECRET));
 app.use(express.json()); // built-in middleware
 // for parsing multipart/form-data (required with FormData)
 app.use(multer().none()); // multer middleware
-
 
 const SERVER_ERR_CODE = 500;
 

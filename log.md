@@ -1,10 +1,22 @@
 started logging since 5/7/2023 too much to keep track of!!
 
+# 8/25/2-23:
+
+## implemented:
+
+    - fixed bug obstacles not finishing after timer runs out
+    - changed distribution of obstacles (time gap into pre-divided array instead of uniform distribution) to ensure obstacle == 0 matches when timer ends
+    - ^^ tried using poisson process/exponential interarrival for this, but is way to random and thus we're now using just uniform
+
 # 7/19/2023:
 
 ## implemented:
 
     - fixed bug obstacle count not resetting
+
+## todo:
+
+    - (BUG!!) obstacles didn't finish after timer ran out
 
 # 7/18/2023:
 
