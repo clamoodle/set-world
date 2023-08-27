@@ -1,6 +1,13 @@
 started logging since 5/7/2023 too much to keep track of!!
 
-# 8/25/2-23:
+# 8/27/2023:
+
+## implemented:
+
+    - change obstacle per rate to 6 from 5 and default rate to 5 from 6, increments from 2 to 1. now rate 10 is hard 
+    - fixed obstacle rate 0 game ending immediately bug
+
+# 8/25/2023:
 
 ## implemented:
 

@@ -17,7 +17,7 @@
     const SCORE_IF_REACH_GOAL = 500;
 
     // Obstacle constants
-    const NUM_OBSTACLE_PER_RATE = 5; // Pretty much arbitrary, but default is 30 obstacles in 2 min.
+    const NUM_OBSTACLE_PER_RATE = 6; // Pretty much arbitrary, but default is 30 obstacles in 2 min.
     // Minimum and maximum time in MS between each obstacle
     let OBSTACLE_MIN_GAP_MS = (TOTAL_GAME_TIME_MS / qs("#obstacle-count").textContent) * 0.5;
     let OBSTACLE_MAX_GAP_MS = (TOTAL_GAME_TIME_MS / qs("#obstacle-count").textContent) * 1.5;
@@ -435,6 +435,12 @@
      * @param {Number} numArrivals - The number of arrivals to fit within this total time
      */
     function generateObstacleInterarrivalTimes(totalTime, numArrivals) {
+        // Generate only 1 entry of total time if no obstacles/arrivals
+        if (numArrivals === 0) {
+            obstacleInterarrivalMS = [totalTime];
+            return;
+        }
+
         // Generate interarrival times with exponential distribution with given average
         obstacleInterarrivalMS = [];
         for (let i = 0; i < numArrivals; i++) {
