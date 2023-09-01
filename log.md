@@ -1,5 +1,16 @@
 started logging since 5/7/2023 too much to keep track of!!
 
+# 8/31/2023:
+
+## implemented:
+
+    - randomBytes(16) sessionId to prevent session attacks (instead of cookie secret/parser, which can still be copy/pasted)
+
+## todo:
+
+    - logout button/endpoint
+
+
 # 8/27/2023:
 
 ## implemented:

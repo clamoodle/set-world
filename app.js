@@ -21,14 +21,10 @@ const path = require("path");
 
 // const logger = require("morgan");
 
-const COOKIE_SECRET = "20CWmcWQQN";
-let SESSIONS = {};
-
 const app = express();
 const server = http.createServer(app);
 // const io = socket(server);
 app.use(express.static("public"));
-app.use(cookieParser(COOKIE_SECRET));
 
 // https://eipsum.github.io/cs132/lectures/lec18-node-post-documentation/index.html#/34
 // for parsing application/x-www-form-urlencoded

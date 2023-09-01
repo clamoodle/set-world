@@ -15,7 +15,9 @@
     "password": "123",
     "image_path": "media/avatars/blue-dog.png",
     "species": "not eel",
-    "friends": [],
+    "friends": [
+      "clamoodle"
+    ],
     "high_score": 4380,
     "email": "inthemistofoodles@gmail.com"
   },
@@ -56,7 +58,8 @@
       "crunchyeel",
       "syc",
       "pearlissus",
-      "happy eel"
+      "happy eel",
+      "yishuc"
     ],
     "high_score": 4733,
     "email": "inthemistofoodles@gmail.com"

@@ -1,15 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const fsp = require("fs/promises");
 const cookieParser = require("cookie-parser");
+const { randomBytes } = require("crypto");
 
 // const logger = require("morgan");
 
 const USER_DATA_PATH = "users.json";
-const COOKIE_SECRET = "20CWmcWQQN";
+let SESSIONS = {}; // sessionId -> {'username': '', ...}
 
 router.use(express.static("public"));
-router.use(cookieParser(COOKIE_SECRET));
 
 /*-------------------- app.get/app.post endpoints -------------------- */
 
@@ -43,11 +43,34 @@ router.get("/login", readUserData, async (req, res) => {
         if (res.locals.users[userIdx].password !== password) {
             next(Error("Incorrect password"));
         }
-        res.cookie("curr_user", res.locals.users[userIdx], { signed: true });
+        const nextSessionId = randomBytes(16).toString();
+        res.cookie("sessionId", nextSessionId, {
+            secure: true,
+            httpOnly: true,
+            sameSite: "lax",
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        });
+        SESSIONS[nextSessionId] = res.locals.users[userIdx];
         res.json(res.locals.users[userIdx]);
     } catch (err) {
         res.type("text");
         res.status(SERVER_ERR_CODE).send("An error occurred when accessing request data.");
+    }
+});
+
+/**
+ * Logs out current user if logged in, clears 'sessionId' cookie
+ */
+router.post("/logout", (req, res) => {
+    try {
+        res.clearCookie("sessionId", {
+            secure: true,
+            httpOnly: true,
+            sameSite: "lax",
+        });
+    } catch (err) {
+        res.type("text");
+        res.status(SERVER_ERR_CODE).send("An error occured when accessing request data.");
     }
 });
 
@@ -72,17 +95,17 @@ router.post("/addFriend/:username", readUserData, (req, res, next) => {
     if (!req.params.username) {
         next(Error("Required POST path parameter for /addFriend: username."));
     }
-    if (!req.signedCookies.curr_user) {
+    if (!req.cookies.sessionId) {
         next(Error("Can't add friend before logging in :("));
     }
 
     // Updating friends list
     let friendIdx = res.locals.users.findIndex((user) => user.username === req.params.username);
     let userIdx = res.locals.users.findIndex(
-        (user) => user.username === req.signedCookies.curr_user.username
+        (user) => user.username === SESSIONS[req.cookies.sessionId].username
     );
-    if (!res.locals.users[friendIdx].friends.includes(req.signedCookies.curr_user.username)) {
-        res.locals.users[friendIdx].friends.push(req.signedCookies.curr_user.username);
+    if (!res.locals.users[friendIdx].friends.includes(SESSIONS[req.cookies.sessionId].username)) {
+        res.locals.users[friendIdx].friends.push(SESSIONS[req.cookies.sessionId].username);
         res.locals.users[userIdx].friends.push(req.params.username);
     }
 
@@ -104,12 +127,12 @@ router.post("/updateScore", readUserData, async (req, res, next) => {
         next(Error("Required POST parameters for /updateScore: score."));
     }
 
-    if (!req.signedCookies.curr_user) {
+    if (!req.cookies.sessionId) {
         next(Error("Can't save score before logging in :("));
     }
 
     // Updating high score
-    const currUsername = req.signedCookies.curr_user.username;
+    const currUsername = SESSIONS[req.cookies.sessionId].username;
     let userIdx = res.locals.users.findIndex((user) => user.username === currUsername);
     res.locals.users[userIdx].high_score = Math.max(
         req.body.score,
@@ -176,13 +199,14 @@ async function readUserData(req, res, next) {
  */
 function getFilteredUserData(req, res, next) {
     // Check log in cookies
-    if (!req.signedCookies.curr_user) {
+    if (!req.cookies.sessionId) {
         next(Error("Login cookie missing! Nom nom!"));
     }
 
     // Filter out user him/herself
     res.locals.users = res.locals.users.filter(
-        (user) => user.username.toLowerCase() !== req.signedCookies.curr_user.username.toLowerCase()
+        (user) =>
+            user.username.toLowerCase() !== SESSIONS[req.cookies.sessionId].username.toLowerCase()
     );
 
     // Check each query param to filter by
@@ -199,7 +223,7 @@ function getFilteredUserData(req, res, next) {
                             user.friends.some((entry) => {
                                 return (
                                     entry.toLowerCase() ===
-                                    req.signedCookies.curr_user.username.toLowerCase()
+                                    SESSIONS[req.cookies.sessionId].username.toLowerCase()
                                 );
                             })
                     );
@@ -209,7 +233,7 @@ function getFilteredUserData(req, res, next) {
                         user.friends.every((entry) => {
                             return (
                                 entry.toLowerCase() !==
-                                req.signedCookies.curr_user.username.toLowerCase()
+                                SESSIONS[req.cookies.sessionId].username.toLowerCase()
                             );
                         })
                     );
